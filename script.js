@@ -1,10 +1,12 @@
 function goVerify() {
   var url = document.getElementById("url").value;
 
-  // Extract credential ID from URL
-  var id = url.split("/").pop();
+  if (url === "") {
+    alert("Please enter credential URL");
+    return;
+  }
 
-  // Redirect to verification page
+  var id = url.split("/").pop();
   window.location.href = "verify.html?id=" + id;
 }
 
@@ -12,16 +14,17 @@ window.onload = function () {
   var params = new URLSearchParams(window.location.search);
   var id = params.get("id");
 
-  // Dummy valid credential for assignment
+  if (!id) return;
+
   if (id === "ABC123") {
     document.getElementById("output").innerHTML =
       <h2 style="color:green;">
-       ✅ Your certification credentials are successful
+        ✅ Your certification credentials are successful
        </h2>;
-  } else if (id) {
+  } else {
     document.getElementById("output").innerHTML =
       <h2 style="color:red;">
-       ❌ Invalid Credential URL
+        ❌ Invalid Credential URL
        </h2>;
   }
 };
