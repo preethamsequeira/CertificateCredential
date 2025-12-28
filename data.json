@@ -1,0 +1,12 @@
+[
+  {
+    "id": "CERT-101",
+    "name": "John Doe",
+    "course": "Web Development"
+  },
+  {
+    "id": "CERT-102",
+    "name": "Jane Smith",
+    "course": "Data Science"
+  }
+]
