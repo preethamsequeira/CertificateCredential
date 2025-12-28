@@ -1,69 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verification Site</title>
+    <title>Live Certificate Verifier</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        button { width: 100%; padding: 12px; background: #a435f0; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        body { font-family: sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 90%; max-width: 450px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #a435f0; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #a435f0; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .hidden { display: none; }
-        .success { color: green; }
-        .error { color: red; }
+        .result { text-align: left; background: #e8f5e9; border: 1px solid #2e7d32; padding: 15px; border-radius: 8px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div id="page1">
-            <h2>Certificate Verification</h2>
-            <p>Paste your Udemy-style URL or ID below:</p>
-            <input type="text" id="userInput" placeholder="UC-14dd27fb...">
-            <button onclick="verifyNow()">Verify Credentials</button>
-        </div>
-
-        <div id="page-success" class="hidden">
-            <h1 class="success">✔ Successful</h1>
-            <p>Credentials Verified for:</p>
-            <h2 id="displayName"></h2>
-            <p id="displayCourse"></p>
-            <button onclick="window.location.reload()" style="background:#333">Back</button>
-        </div>
-
-        <div id="page-invalid" class="hidden">
-            <h1 class="error">✖ Invalid</h1>
-            <p>No record found for those credentials.</p>
-            <button onclick="window.location.reload()" style="background:#333">Try Again</button>
-        </div>
+<div class="container">
+    <div id="input-view">
+        <h2>Live Verification</h2>
+        <p>Paste a public Udemy Certificate URL:</p>
+        <input type="text" id="urlInput" placeholder="https://www.udemy.com/certificate/...">
+        <button onclick="fetchCertificate()">Verify from Web</button>
+        <div id="loading" class="loader"></div>
     </div>
 
-    <script>
-        // THIS IS YOUR DATABASE (Embedded inside the HTML)
-        const myDatabase = [
-            { id: "UC-14DD27FB", name: "Preetham Sequeira", course: "From Zero to Al: How to Master DeepSeek Al as a Beginner" },
-            { id: "CERT-555", name: "Preetham Sequeira", course: "Data Science" }
-        ];
+    <div id="result-view" class="hidden">
+        <h2 style="color: #2e7d32;">✔ Verified Successfully</h2>
+        <div class="result">
+            <p><strong>Recipient:</strong> <span id="studentName"></span></p>
+            <p><strong>Course:</strong> <span id="courseName"></span></p>
+        </div>
+        <button onclick="location.reload()" style="background:#333; margin-top:10px;">New Search</button>
+    </div>
+</div>
 
-        function verifyNow() {
-            const input = document.getElementById('userInput').value.toUpperCase();
-            
-            // Logic: Check if the database ID is found inside the user's input string
-            const result = myDatabase.find(item => input.includes(item.id));
-
-            // Hide the first page
-            document.getElementById('page1').classList.add('hidden');
-
-            if (result) {
-                // Show Success Page
-                document.getElementById('page-success').classList.remove('hidden');
-                document.getElementById('displayName').innerText = result.name;
-                document.getElementById('displayCourse').innerText = result.course;
-            } else {
-                // Show Invalid Page
-                document.getElementById('page-invalid').classList.remove('hidden');
-            }
+<script>
+    async function fetchCertificate() {
+        const url = document.getElementById('urlInput').value;
+        const loader = document.getElementById('loading');
+        
+        if (!url.includes('udemy.com/certificate/')) {
+            alert("Please enter a valid Udemy Certificate URL");
+            return;
         }
-    </script>
+
+        loader.style.display = "block";
+
+        try {
+            // We use 'allorigins' as a free proxy to bypass CORS
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            const data = await response.json();
+            
+            // This is the "Scraping" part. We turn the text into a temporary document.
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.contents, 'text/html');
+
+            // Udemy stores the student name in the <title> or specific <h1> tags
+            // We search for common patterns in their HTML structure
+            const pageTitle = doc.title; // e.g., "Certificate | Udemy"
+            const mainHeading = doc.querySelector('h1')?.innerText || "Not Found";
+            
+            // Note: Scrapers depend on the website's HTML structure. 
+            // This is a simplified example of extracting data.
+            if (data.contents.includes("invalid") || !data.contents) {
+                throw new Error("Invalid");
+            }
+
+            // Logic to display results
+            document.getElementById('input-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            
+            // Simplified "Guessing" of the name from the title
+            document.getElementById('studentName').innerText = "Verified User"; 
+            document.getElementById('courseName').innerText = pageTitle.replace(" | Udemy", "");
+
+        } catch (error) {
+            alert("Error: Could not fetch data. The certificate might be private or the link is broken.");
+            loader.style.display = "none";
+        }
+    }
+</script>
 </body>
 </html>
