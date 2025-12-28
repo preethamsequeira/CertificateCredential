@@ -1,2 +1,2 @@
 # CertificateCredential
-Just a simple webpage to check Certificate Credential Verification
+Just a simple webpage to verify Online Websites Certificate Credential
