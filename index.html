@@ -1,222 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Course Verification</title>
+    <title>Verification Site</title>
     <style>
-        /* CSS: Styling and Mobile Responsiveness */
-        :root {
-            --udemy-purple: #a435f0;
-            --success-green: #2e7d32;
-            --error-red: #d32f2f;
-            --dark-text: #1c1d1f;
-            --light-bg: #f7f9fa;
-        }
-
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-            background-color: var(--light-bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--dark-text);
-        }
-
-        .container {
-            width: 90%;
-            max-width: 420px;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            text-align: center;
-        }
-
-        .logo {
-            font-weight: 800;
-            font-size: 28px;
-            color: var(--udemy-purple);
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
-
-        h2 { font-size: 20px; margin-bottom: 10px; }
-        p { color: #6a6f73; font-size: 14px; line-height: 1.5; }
-
-        .input-group {
-            margin: 25px 0;
-            text-align: left;
-        }
-
-        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #1c1d1f;
-            box-sizing: border-box; 
-            font-size: 16px;
-            border-radius: 4px;
-        }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--udemy-purple);
-            color: white;
-            border: none;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-radius: 4px;
-        }
-
-        button:hover { background-color: #8710d8; }
-
-        /* Results Views */
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 20px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 12px; background: #a435f0; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
-        
-        .status-icon { font-size: 60px; margin-bottom: 15px; }
-        .success-text { color: var(--success-green); }
-        .error-text { color: var(--error-red); }
-        
-        .cert-card {
-            background: #f8f9fb;
-            border: 1px solid #d1d7dc;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: left;
-            border-left: 5px solid var(--udemy-purple);
-        }
-
-        .cert-card div { margin-bottom: 10px; }
-        .label-small { font-size: 12px; color: #6a6f73; text-transform: uppercase; font-weight: bold; }
-        .value-large { font-size: 16px; font-weight: bold; display: block; }
-
-        .back-btn {
-            background-color: #1c1d1f;
-            margin-top: 10px;
-        }
+        .success { color: green; }
+        .error { color: red; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo">VERIFY</div>
-
-        <div id="view-search">
-            <h2>Verify Certificate</h2>
-            <p>Enter your certificate URL or ID to confirm its authenticity.</p>
-            
-            <div class="input-group">
-                <label>Certificate URL / ID</label>
-                <input type="text" id="certInput" placeholder="e.g. UC-14dd27fb-18a6...">
-            </div>
-            
-            <button onclick="handleVerify()">Verify Certificate</button>
+    <div class="card">
+        <div id="page1">
+            <h2>Certificate Verification</h2>
+            <p>Paste your Udemy-style URL or ID below:</p>
+            <input type="text" id="userInput" placeholder="UC-14dd27fb...">
+            <button onclick="verifyNow()">Verify Credentials</button>
         </div>
 
-        <div id="view-success" class="hidden">
-            <div class="status-icon">✅</div>
-            <h2 class="success-text">Certification Successful</h2>
-            <p>This is a verified record for the following individual:</p>
-            
-            <div class="cert-card">
-                <div>
-                    <span class="label-small">Student Name</span>
-                    <span id="studentName" class="value-large"></span>
-                </div>
-                <div>
-                    <span class="label-small">Course Name</span>
-                    <span id="courseName" class="value-large"></span>
-                </div>
-                <div>
-                    <span class="label-small">Verification ID</span>
-                    <span id="certID" class="value-large" style="font-family: monospace;"></span>
-                </div>
-            </div>
-            
-            <button class="back-btn" onclick="resetView()">Verify Another</button>
+        <div id="page-success" class="hidden">
+            <h1 class="success">✔ Successful</h1>
+            <p>Credentials Verified for:</p>
+            <h2 id="displayName"></h2>
+            <p id="displayCourse"></p>
+            <button onclick="window.location.reload()" style="background:#333">Back</button>
         </div>
 
-        <div id="view-invalid" class="hidden">
-            <div class="status-icon">❌</div>
-            <h2 class="error-text">Invalid Link / ID</h2>
-            <p>The credentials you entered do not match our records. Please ensure the URL is correct and try again.</p>
-            <button class="back-btn" onclick="resetView()">Try Again</button>
+        <div id="page-invalid" class="hidden">
+            <h1 class="error">✖ Invalid</h1>
+            <p>No record found for those credentials.</p>
+            <button onclick="window.location.reload()" style="background:#333">Try Again</button>
         </div>
     </div>
 
     <script>
-        // THE DATABASE (Add your certificate IDs here)
-        const certificateData = [
-            {
-                id: "UC-14DD27FB-18A6-4066-97C5-19ECC9FFC2FE",
-                name: "John Doe",
-                course: "Full Stack Web Development"
-            },
-            {
-                id: "UC-ABC12345",
-                name: "Jane Smith",
-                course: "Python for Data Science"
-            }
+        // THIS IS YOUR DATABASE (Embedded inside the HTML)
+        const myDatabase = [
+            { id: "UC-14DD27FB", name: "John Doe", course: "Web Design" },
+            { id: "CERT-555", name: "Jane Smith", course: "Data Science" }
         ];
 
-        function handleVerify() {
-            const inputVal = document.getElementById('certInput').value.trim();
+        function verifyNow() {
+            const input = document.getElementById('userInput').value.toUpperCase();
             
-            if (!inputVal) {
-                alert("Please enter a valid ID or URL");
-                return;
-            }
+            // Logic: Check if the database ID is found inside the user's input string
+            const result = myDatabase.find(item => input.includes(item.id));
 
-            processVerification(inputVal);
-        }
-
-        function processVerification(userInput) {
-            // Hide the search page
-            document.getElementById('view-search').classList.add('hidden');
-
-            // Check if any ID from our database is contained within the user's input
-            // This allows the user to paste the whole URL or just the ID
-            const result = certificateData.find(cert => 
-                userInput.toUpperCase().includes(cert.id.toUpperCase())
-            );
+            // Hide the first page
+            document.getElementById('page1').classList.add('hidden');
 
             if (result) {
-                // Show Success
-                document.getElementById('view-success').classList.remove('hidden');
-                document.getElementById('studentName').innerText = result.name;
-                document.getElementById('courseName').innerText = result.course;
-                document.getElementById('certID').innerText = result.id;
+                // Show Success Page
+                document.getElementById('page-success').classList.remove('hidden');
+                document.getElementById('displayName').innerText = result.name;
+                document.getElementById('displayCourse').innerText = result.course;
             } else {
-                // Show Invalid
-                document.getElementById('view-invalid').classList.remove('hidden');
+                // Show Invalid Page
+                document.getElementById('page-invalid').classList.remove('hidden');
             }
         }
-
-        function resetView() {
-            document.getElementById('certInput').value = "";
-            document.getElementById('view-success').classList.add('hidden');
-            document.getElementById('view-invalid').classList.add('hidden');
-            document.getElementById('view-search').classList.remove('hidden');
-            
-            // Clear URL parameters if any
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        // AUTO-LOAD: If user visits yoursite.com/?id=UC-14DD...
-        window.onload = () => {
-            const params = new URLSearchParams(window.location.search);
-            const idParam = params.get('id');
-            if (idParam) {
-                processVerification(idParam);
-            }
-        };
     </script>
 </body>
 </html>
