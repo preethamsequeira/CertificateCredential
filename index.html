@@ -3,131 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate Verification</title>
+    <title>Online Course Verification</title>
     <style>
-        /* Mobile-First Design */
+        /* CSS: Styling and Mobile Responsiveness */
+        :root {
+            --udemy-purple: #a435f0;
+            --success-green: #2e7d32;
+            --error-red: #d32f2f;
+            --dark-text: #1c1d1f;
+            --light-bg: #f7f9fa;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f9fa;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--light-bg);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #1c1d1f;
+            color: var(--dark-text);
         }
 
         .container {
             width: 90%;
-            max-width: 450px;
+            max-width: 420px;
             background: white;
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
             text-align: center;
         }
 
-        .logo { font-weight: bold; font-size: 24px; color: #a435f0; margin-bottom: 20px; }
-        
+        .logo {
+            font-weight: 800;
+            font-size: 28px;
+            color: var(--udemy-purple);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        h2 { font-size: 20px; margin-bottom: 10px; }
+        p { color: #6a6f73; font-size: 14px; line-height: 1.5; }
+
+        .input-group {
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
+
         input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 14px;
             border: 1px solid #1c1d1f;
-            box-sizing: border-box; /* Critical for mobile */
+            box-sizing: border-box; 
             font-size: 16px;
+            border-radius: 4px;
         }
 
         button {
             width: 100%;
-            padding: 12px;
-            background-color: #a435f0;
+            padding: 16px;
+            background-color: var(--udemy-purple);
             color: white;
             border: none;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background 0.2s;
+            border-radius: 4px;
         }
 
+        button:hover { background-color: #8710d8; }
+
+        /* Results Views */
         .hidden { display: none; }
         
-        /* Success/Failure States */
-        .status-icon { font-size: 50px; margin-bottom: 10px; }
-        .success { color: #2e7d32; }
-        .error { color: #d32f2f; }
+        .status-icon { font-size: 60px; margin-bottom: 15px; }
+        .success-text { color: var(--success-green); }
+        .error-text { color: var(--error-red); }
         
-        .cert-box {
+        .cert-card {
+            background: #f8f9fb;
             border: 1px solid #d1d7dc;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 20px;
+            margin: 20px 0;
             text-align: left;
+            border-left: 5px solid var(--udemy-purple);
+        }
+
+        .cert-card div { margin-bottom: 10px; }
+        .label-small { font-size: 12px; color: #6a6f73; text-transform: uppercase; font-weight: bold; }
+        .value-large { font-size: 16px; font-weight: bold; display: block; }
+
+        .back-btn {
+            background-color: #1c1d1f;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="logo">VerifyCert</div>
+        <div class="logo">VERIFY</div>
 
         <div id="view-search">
-            <h2>Certificate Verification</h2>
-            <p>Enter the URL or Certificate ID to verify authenticity.</p>
-            <input type="text" id="certInput" placeholder="Enter ID (e.g., UC-14dd27fb)">
+            <h2>Verify Certificate</h2>
+            <p>Enter your certificate URL or ID to confirm its authenticity.</p>
+            
+            <div class="input-group">
+                <label>Certificate URL / ID</label>
+                <input type="text" id="certInput" placeholder="e.g. UC-14dd27fb-18a6...">
+            </div>
+            
             <button onclick="handleVerify()">Verify Certificate</button>
         </div>
 
         <div id="view-success" class="hidden">
-            <div class="status-icon success">✔</div>
-            <h2 class="success">Verification Successful</h2>
-            <p>This is a valid certificate issued by our platform.</p>
-            <div class="cert-box">
-                <strong>Recipient:</strong> <span id="studentName"></span><br>
-                <strong>Course:</strong> <span id="courseName"></span><br>
-                <strong>Date:</strong> <span id="issueDate"></span>
+            <div class="status-icon">✅</div>
+            <h2 class="success-text">Certification Successful</h2>
+            <p>This is a verified record for the following individual:</p>
+            
+            <div class="cert-card">
+                <div>
+                    <span class="label-small">Student Name</span>
+                    <span id="studentName" class="value-large"></span>
+                </div>
+                <div>
+                    <span class="label-small">Course Name</span>
+                    <span id="courseName" class="value-large"></span>
+                </div>
+                <div>
+                    <span class="label-small">Verification ID</span>
+                    <span id="certID" class="value-large" style="font-family: monospace;"></span>
+                </div>
             </div>
-            <button onclick="window.location.href='index.html'" style="background:#1c1d1f">Check Another</button>
+            
+            <button class="back-btn" onclick="resetView()">Verify Another</button>
         </div>
 
         <div id="view-invalid" class="hidden">
-            <div class="status-icon error">✖</div>
-            <h2 class="error">Invalid Link</h2>
-            <p>We couldn't find any certificate matching that record. Please check the URL or ID and try again.</p>
-            <button onclick="window.location.href='index.html'" style="background:#1c1d1f">Try Again</button>
+            <div class="status-icon">❌</div>
+            <h2 class="error-text">Invalid Link / ID</h2>
+            <p>The credentials you entered do not match our records. Please ensure the URL is correct and try again.</p>
+            <button class="back-btn" onclick="resetView()">Try Again</button>
         </div>
     </div>
 
     <script>
-        // Data Simulation (Usually this comes from your data.json)
-        const mockDatabase = [
-            { id: "UC-14dd27fb", name: "John Doe", course: "Python Masterclass", date: "Oct 2024" },
-            { id: "CERT-99", name: "Jane Smith", course: "UI/UX Design", date: "Dec 2024" }
+        // THE DATABASE (Add your certificate IDs here)
+        const certificateData = [
+            {
+                id: "UC-14DD27FB-18A6-4066-97C5-19ECC9FFC2FE",
+                name: "John Doe",
+                course: "Full Stack Web Development"
+            },
+            {
+                id: "UC-ABC12345",
+                name: "Jane Smith",
+                course: "Python for Data Science"
+            }
         ];
 
-        function checkID(id) {
-            const student = mockDatabase.find(s => id.includes(s.id));
+        function handleVerify() {
+            const inputVal = document.getElementById('certInput').value.trim();
             
-            // Hide initial search
+            if (!inputVal) {
+                alert("Please enter a valid ID or URL");
+                return;
+            }
+
+            processVerification(inputVal);
+        }
+
+        function processVerification(userInput) {
+            // Hide the search page
             document.getElementById('view-search').classList.add('hidden');
 
-            if (student) {
-                document.getElementById('view-success').classList.remove('hidden');
-                document.getElementById('studentName').innerText = student.name;
-                document.getElementById('courseName').innerText = student.course;
-                document.getElementById('issueDate').innerText = student.date;
-            } else {
-                document.getElementById('view-
-                                        const student = data.find(s => s.id === input || input.includes(s.id));
+            // Check if any ID from our database is contained within the user's input
+            // This allows the user to paste the whole URL or just the ID
+            const result = certificateData.find(cert => 
+                userInput.toUpperCase().includes(cert.id.toUpperCase())
+            );
 
-            if (student) {
-                document.getElementById('page1').classList.add('hidden');
-                document.getElementById('page2').classList.remove('hidden');
-                document.getElementById('studentName').innerText = student.name;
-                document.getElementById('courseName').innerText = "Course: " + student.course;
+            if (result) {
+                // Show Success
+                document.getElementById('view-success').classList.remove('hidden');
+                document.getElementById('studentName').innerText = result.name;
+                document.getElementById('courseName').innerText = result.course;
+                document.getElementById('certID').innerText = result.id;
             } else {
-                alert("Invalid Credentials. Please check the ID.");
+                // Show Invalid
+                document.getElementById('view-invalid').classList.remove('hidden');
             }
         }
+
+        function resetView() {
+            document.getElementById('certInput').value = "";
+            document.getElementById('view-success').classList.add('hidden');
+            document.getElementById('view-invalid').classList.add('hidden');
+            document.getElementById('view-search').classList.remove('hidden');
+            
+            // Clear URL parameters if any
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // AUTO-LOAD: If user visits yoursite.com/?id=UC-14DD...
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('id');
+            if (idParam) {
+                processVerification(idParam);
+            }
+        };
     </script>
 </body>
 </html>
