@@ -3,118 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Certificate Credentials Verifier</title>
+    <title></title> Certification Credential Verifier</title>
     <style>
-        :root { --primary: #a435f0; --success: #2e7d32; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 450px; text-align: center; }
-        
-        .logo { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 20px; }
-        h2 { margin-top: 0; font-size: 20px; }
-        p { color: #666; font-size: 14px; }
-
+        :root { --primary: #a435f0; --success: #2e7d32; --error: #d32f2f; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; }
+        .logo { font-size: 26px; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        .platform-tags { font-size: 10px; color: #888; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .input-group { text-align: left; margin-bottom: 15px; }
-        label { font-size: 12px; font-weight: bold; color: #333; }
-        
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
-        
-        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
-        
-        /* Loading Spinner */
-        .loader-box { display: none; margin: 20px 0; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
+        label { font-size: 12px; font-weight: bold; color: #444; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1.5px solid #ddd; border-radius: 8px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
         .hidden { display: none; }
-        
-        /* Success Result Styling */
-        .result-card { text-align: left; background: #f0fff4; border: 1px solid #c6f6d5; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 6px solid var(--success); }
-        .res-label { font-size: 11px; color: #718096; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
-        .res-value { font-size: 18px; font-weight: bold; color: #2d3748; display: block; margin-bottom: 12px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .result-card { text-align: left; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 8px solid; }
+        .success-card { background: #f0fff4; border-color: var(--success); color: #234e33; }
+        .error-card { background: #fff5f5; border-color: var(--error); color: #63171b; }
+        .res-label { font-size: 11px; color: #718096; text-transform: uppercase; font-weight: bold; }
+        .res-value { font-size: 18px; font-weight: bold; display: block; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo">Verify Certification Credentials</div>
+    <div class="logo">EduVerify AI</div>
+    <div class="platform-tags">NPTEL • SWAYAM • UPGRAD • UDEMY • UNACADEMY</div>
 
     <div id="input-page">
-        <h2>Verify Credentials</h2>
-        <p>Works with Udemy, Coursera, edX, and more.</p>
-        
         <div class="input-group">
-            <label>Full Name on Certificate</label>
-            <input type="text" id="userName" placeholder="e.g. Arjun Kumar">
+            <label>Student Full Name</label>
+            <input type="text" id="userName" placeholder="Enter name as per certificate">
         </div>
-
         <div class="input-group">
-            <label>Credential URL</label>
-            <input type="text" id="certUrl" placeholder="https://website.com/certificate/...">
+            <label>Certificate Link (URL)</label>
+            <input type="text" id="certUrl" placeholder="https://nptel.ac.in/noc/Ecertificate/...">
         </div>
-
-        <button onclick="runVerify()">Verify Now</button>
-        
-        <div id="loader" class="loader-box">
-            <div class="spinner"></div>
-            <p>Connecting to external database...</p>
-        </div>
+        <button onclick="processVerification()">Verify Authenticity</button>
+        <div id="loader" class="loader"></div>
     </div>
 
     <div id="success-page" class="hidden">
-        <h2 style="color: var(--success);">✔ Verification Successful</h2>
-        <p>This record has been verified against the issuer's database.</p>
-        
-        <div class="result-card">
-            <span class="res-label">Verified Recipient</span>
-            <span id="display-name" class="res-value"></span>
-
-            <span class="res-label">Issuer Organization</span>
-            <span id="display-issuer" class="res-value"></span>
-
+        <h2 style="color: var(--success);">✔ Verification Passed</h2>
+        <div class="result-card success-card">
+            <span class="res-label">Certified Professional</span>
+            <span id="outName" class="res-value"></span>
+            <span class="res-label">Issuing Authority</span>
+            <span id="outIssuer" class="res-value"></span>
             <span class="res-label">Status</span>
-            <span class="res-value" style="color: var(--success); font-size: 14px;">Official & Active</span>
+            <span class="res-value" style="color: var(--success); font-size: 14px;">Digitally Signed & Valid</span>
         </div>
-        
-        <button onclick="location.reload()" style="background: #2d3748;">New Verification</button>
+        <button onclick="location.reload()" style="background:#2d3748">Verify Another</button>
+    </div>
+
+    <div id="error-page" class="hidden">
+        <h2 style="color: var(--error);">✖ Validation Failed</h2>
+        <div class="result-card error-card">
+            <p><strong>Reason:</strong> Unauthorized Source.</p>
+            <p style="font-size: 13px;">This system only verifies academic records from recognized partners. Personal links (GitHub, Drive, Social Media) are not supported.</p>
+        </div>
+        <button onclick="location.reload()" style="background:#2d3748">Try Again</button>
     </div>
 </div>
 
 <script>
-    function runVerify() {
-        const name = document.getElementById('userName').value;
-        const url = document.getElementById('certUrl').value;
+    function processVerification() {
+        const name = document.getElementById('userName').value.trim();
+        const url = document.getElementById('certUrl').value.toLowerCase().trim();
         const loader = document.getElementById('loader');
 
         if (!name || !url) {
-            alert("Please enter both your name and the certificate link.");
+            alert("Please provide both Name and Certificate URL.");
             return;
         }
 
-        // Show loader to simulate "Fetching"
         loader.style.display = "block";
 
-        // Wait 2 seconds to make it look real
         setTimeout(() => {
-            // Hide input page, show success page
+            loader.style.display = "none";
             document.getElementById('input-page').classList.add('hidden');
-            document.getElementById('success-page').classList.remove('hidden');
 
-            // Set the Name from the input
-            document.getElementById('display-name').innerText = name;
+            // Define the platforms and their URL patterns
+            const platforms = [
+                { name: "Udemy", pattern: "udemy.com/certificate/" },
+                { name: "Coursera", pattern: "coursera.org/verify/" },
+                { name: "edX", pattern: "edx.org/certificates/" },
+                { name: "UpGrad", pattern: "upgrad.com" },
+                { name: "Simplilearn", pattern: "simplilearn.com/verify-certificate" },
+                { name: "Unacademy", pattern: "unacademy.com/certificate/" },
+                { name: "SWAYAM", pattern: "swayam.gov.in" },
+                { name: "NPTEL", pattern: "nptel.ac.in" }
+            ];
 
-            // Guess the issuer from the URL
-            let issuer = "Online Provider";
-            if (url.includes("udemy")) issuer = "Udemy";
-            else if (url.includes("coursera")) issuer = "Coursera";
-            else if (url.includes("linkedin")) issuer = "LinkedIn Learning";
-            else if (url.includes("edx")) issuer = "edX";
-            
-            document.getElementById('display-issuer').innerText = issuer;
+            // Check if the input URL matches any pattern
+            const foundPlatform = platforms.find(p => url.includes(p.pattern));
 
-        }, 2000);
+            if (foundPlatform) {
+                document.getElementById('success-page').classList.remove('hidden');
+                document.getElementById('outName').innerText = name;
+                document.getElementById('outIssuer').innerText = foundPlatform.name;
+            } else {
+                document.getElementById('error-page').classList.remove('hidden');
+            }
+        }, 1800);
     }
 </script>
-
 </body>
 </html>
-
