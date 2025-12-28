@@ -2,39 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Course Verification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        /* Mobile-First Design */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f9fa;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1c1d1f;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .logo { font-weight: bold; font-size: 24px; color: #a435f0; margin-bottom: 20px; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #1c1d1f;
+            box-sizing: border-box; /* Critical for mobile */
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #a435f0;
+            color: white;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
         .hidden { display: none; }
-        input { padding: 10px; width: 300px; }
-        button { padding: 10px 20px; cursor: pointer; background: #a435f0; color: white; border: none; }
+        
+        /* Success/Failure States */
+        .status-icon { font-size: 50px; margin-bottom: 10px; }
+        .success { color: #2e7d32; }
+        .error { color: #d32f2f; }
+        
+        .cert-box {
+            border: 1px solid #d1d7dc;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
 
-    <div id="page1">
-        <h1>Verify Your Certificate</h1>
-        <p>Enter your Credentials ID or URL</p>
-        <input type="text" id="certInput" placeholder="e.g. CERT-101">
-        <button onclick="verify()">Verify</button>
-    </div>
+    <div class="container">
+        <div class="logo">VerifyCert</div>
 
-    <div id="page2" class="hidden">
-        <h1 style="color: green;">✔ Verification Successful</h1>
-        <p>This certificate was issued to:</p>
-        <h2 id="studentName"></h2>
-        <p id="courseName"></p>
-        <button onclick="location.reload()">Verify Another</button>
+        <div id="view-search">
+            <h2>Certificate Verification</h2>
+            <p>Enter the URL or Certificate ID to verify authenticity.</p>
+            <input type="text" id="certInput" placeholder="Enter ID (e.g., UC-14dd27fb)">
+            <button onclick="handleVerify()">Verify Certificate</button>
+        </div>
+
+        <div id="view-success" class="hidden">
+            <div class="status-icon success">✔</div>
+            <h2 class="success">Verification Successful</h2>
+            <p>This is a valid certificate issued by our platform.</p>
+            <div class="cert-box">
+                <strong>Recipient:</strong> <span id="studentName"></span><br>
+                <strong>Course:</strong> <span id="courseName"></span><br>
+                <strong>Date:</strong> <span id="issueDate"></span>
+            </div>
+            <button onclick="window.location.href='index.html'" style="background:#1c1d1f">Check Another</button>
+        </div>
+
+        <div id="view-invalid" class="hidden">
+            <div class="status-icon error">✖</div>
+            <h2 class="error">Invalid Link</h2>
+            <p>We couldn't find any certificate matching that record. Please check the URL or ID and try again.</p>
+            <button onclick="window.location.href='index.html'" style="background:#1c1d1f">Try Again</button>
+        </div>
     </div>
 
     <script>
-        async function verify() {
-            const input = document.getElementById('certInput').value;
-            const response = await fetch('data.json');
-            const data = await response.json();
+        // Data Simulation (Usually this comes from your data.json)
+        const mockDatabase = [
+            { id: "UC-14dd27fb", name: "John Doe", course: "Python Masterclass", date: "Oct 2024" },
+            { id: "CERT-99", name: "Jane Smith", course: "UI/UX Design", date: "Dec 2024" }
+        ];
 
-            // Find if ID exists in our JSON
-            const student = data.find(s => s.id === input || input.includes(s.id));
+        function checkID(id) {
+            const student = mockDatabase.find(s => id.includes(s.id));
+            
+            // Hide initial search
+            document.getElementById('view-search').classList.add('hidden');
+
+            if (student) {
+                document.getElementById('view-success').classList.remove('hidden');
+                document.getElementById('studentName').innerText = student.name;
+                document.getElementById('courseName').innerText = student.course;
+                document.getElementById('issueDate').innerText = student.date;
+            } else {
+                document.getElementById('view-
+                                        const student = data.find(s => s.id === input || input.includes(s.id));
 
             if (student) {
                 document.getElementById('page1').classList.add('hidden');
