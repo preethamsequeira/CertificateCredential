@@ -1,21 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Certificate Verification</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Course Verification</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        .hidden { display: none; }
+        input { padding: 10px; width: 300px; }
+        button { padding: 10px 20px; cursor: pointer; background: #a435f0; color: white; border: none; }
+    </style>
 </head>
 <body>
 
-<h1>Online Course Verification</h1>
+    <div id="page1">
+        <h1>Verify Your Certificate</h1>
+        <p>Enter your Credentials ID or URL</p>
+        <input type="text" id="certInput" placeholder="e.g. CERT-101">
+        <button onclick="verify()">Verify</button>
+    </div>
 
-<p>Enter your Credential URL</p>
+    <div id="page2" class="hidden">
+        <h1 style="color: green;">✔ Verification Successful</h1>
+        <p>This certificate was issued to:</p>
+        <h2 id="studentName"></h2>
+        <p id="courseName"></p>
+        <button onclick="location.reload()">Verify Another</button>
+    </div>
 
-<form>
-  <input type="text" id="url" placeholder="https://verify.com/ABC123">
-  <br><br>
-  <button type="button" onclick="goVerify()">Verify</button>
-</form>
+    <script>
+        async function verify() {
+            const input = document.getElementById('certInput').value;
+            const response = await fetch('data.json');
+            const data = await response.json();
 
-<script src="script.js"></script>
+            // Find if ID exists in our JSON
+            const student = data.find(s => s.id === input || input.includes(s.id));
+
+            if (student) {
+                document.getElementById('page1').classList.add('hidden');
+                document.getElementById('page2').classList.remove('hidden');
+                document.getElementById('studentName').innerText = student.name;
+                document.getElementById('courseName').innerText = "Course: " + student.course;
+            } else {
+                alert("Invalid Credentials. Please check the ID.");
+            }
+        }
+    </script>
 </body>
 </html>
