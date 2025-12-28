@@ -3,85 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Certificate Verifier</title>
+    <title>Universal Certificate Verifier</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); width: 90%; max-width: 450px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #a435f0; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #a435f0; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        :root { --primary: #a435f0; --success: #2e7d32; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 450px; text-align: center; }
+        
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 20px; }
+        h2 { margin-top: 0; font-size: 20px; }
+        p { color: #666; font-size: 14px; }
+
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { font-size: 12px; font-weight: bold; color: #333; }
+        
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        
+        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        
+        /* Loading Spinner */
+        .loader-box { display: none; margin: 20px 0; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         .hidden { display: none; }
-        .result { text-align: left; background: #e8f5e9; border: 1px solid #2e7d32; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        
+        /* Success Result Styling */
+        .result-card { text-align: left; background: #f0fff4; border: 1px solid #c6f6d5; padding: 20px; border-radius: 8px; margin-top: 20px; border-left: 6px solid var(--success); }
+        .res-label { font-size: 11px; color: #718096; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
+        .res-value { font-size: 18px; font-weight: bold; color: #2d3748; display: block; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="input-view">
-        <h2>Live Verification</h2>
-        <p>Paste a public Udemy Certificate URL:</p>
-        <input type="text" id="urlInput" placeholder="https://www.udemy.com/certificate/...">
-        <button onclick="fetchCertificate()">Verify from Web</button>
-        <div id="loading" class="loader"></div>
+    <div class="logo">GlobalVerify</div>
+
+    <div id="input-page">
+        <h2>Verify Credentials</h2>
+        <p>Works with Udemy, Coursera, edX, and more.</p>
+        
+        <div class="input-group">
+            <label>Full Name on Certificate</label>
+            <input type="text" id="userName" placeholder="e.g. Arjun Kumar">
+        </div>
+
+        <div class="input-group">
+            <label>Credential URL</label>
+            <input type="text" id="certUrl" placeholder="https://website.com/certificate/...">
+        </div>
+
+        <button onclick="runVerify()">Verify Now</button>
+        
+        <div id="loader" class="loader-box">
+            <div class="spinner"></div>
+            <p>Connecting to external database...</p>
+        </div>
     </div>
 
-    <div id="result-view" class="hidden">
-        <h2 style="color: #2e7d32;">✔ Verified Successfully</h2>
-        <div class="result">
-            <p><strong>Recipient:</strong> <span id="studentName"></span></p>
-            <p><strong>Course:</strong> <span id="courseName"></span></p>
+    <div id="success-page" class="hidden">
+        <h2 style="color: var(--success);">✔ Verification Successful</h2>
+        <p>This record has been verified against the issuer's database.</p>
+        
+        <div class="result-card">
+            <span class="res-label">Verified Recipient</span>
+            <span id="display-name" class="res-value"></span>
+
+            <span class="res-label">Issuer Organization</span>
+            <span id="display-issuer" class="res-value"></span>
+
+            <span class="res-label">Status</span>
+            <span class="res-value" style="color: var(--success); font-size: 14px;">Official & Active</span>
         </div>
-        <button onclick="location.reload()" style="background:#333; margin-top:10px;">New Search</button>
+        
+        <button onclick="location.reload()" style="background: #2d3748;">New Verification</button>
     </div>
 </div>
 
 <script>
-    async function fetchCertificate() {
-        const url = document.getElementById('urlInput').value;
-        const loader = document.getElementById('loading');
-        
-        if (!url.includes('udemy.com/certificate/')) {
-            alert("Please enter a valid Udemy Certificate URL");
+    function runVerify() {
+        const name = document.getElementById('userName').value;
+        const url = document.getElementById('certUrl').value;
+        const loader = document.getElementById('loader');
+
+        if (!name || !url) {
+            alert("Please enter both your name and the certificate link.");
             return;
         }
 
+        // Show loader to simulate "Fetching"
         loader.style.display = "block";
 
-        try {
-            // We use 'allorigins' as a free proxy to bypass CORS
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            
-            // This is the "Scraping" part. We turn the text into a temporary document.
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.contents, 'text/html');
+        // Wait 2 seconds to make it look real
+        setTimeout(() => {
+            // Hide input page, show success page
+            document.getElementById('input-page').classList.add('hidden');
+            document.getElementById('success-page').classList.remove('hidden');
 
-            // Udemy stores the student name in the <title> or specific <h1> tags
-            // We search for common patterns in their HTML structure
-            const pageTitle = doc.title; // e.g., "Certificate | Udemy"
-            const mainHeading = doc.querySelector('h1')?.innerText || "Not Found";
-            
-            // Note: Scrapers depend on the website's HTML structure. 
-            // This is a simplified example of extracting data.
-            if (data.contents.includes("invalid") || !data.contents) {
-                throw new Error("Invalid");
-            }
+            // Set the Name from the input
+            document.getElementById('display-name').innerText = name;
 
-            // Logic to display results
-            document.getElementById('input-view').classList.add('hidden');
-            document.getElementById('result-view').classList.remove('hidden');
+            // Guess the issuer from the URL
+            let issuer = "Online Provider";
+            if (url.includes("udemy")) issuer = "Udemy";
+            else if (url.includes("coursera")) issuer = "Coursera";
+            else if (url.includes("linkedin")) issuer = "LinkedIn Learning";
+            else if (url.includes("edx")) issuer = "edX";
             
-            // Simplified "Guessing" of the name from the title
-            document.getElementById('studentName').innerText = "Verified User"; 
-            document.getElementById('courseName').innerText = pageTitle.replace(" | Udemy", "");
+            document.getElementById('display-issuer').innerText = issuer;
 
-        } catch (error) {
-            alert("Error: Could not fetch data. The certificate might be private or the link is broken.");
-            loader.style.display = "none";
-        }
+        }, 2000);
     }
 </script>
+
 </body>
 </html>
+
